@@ -1,0 +1,112 @@
+class CoffeeMachine:
+    def __init__(self):
+        self.water_available = 400
+        self.milk_available = 540
+        self.beans_available = 120
+        self.cups_needed = 9
+        self.money = 550
+        self.UI_method()
+
+    def UI_method(self):
+        while True:
+            print("Write action (buy, fill, take, remaining, exit):")
+            action = input()
+        
+            if action == "buy":
+                self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money = self.buy()
+            elif action == "fill":
+                self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money = self.fill()
+            elif action == "take":
+                self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money = self.take()
+            elif action == "remaining":
+                self.status()
+            elif action == "exit":
+                self.exit()
+                break  # Break the loop to exit the program
+            else:
+                print("Invalid action. Please try again.")
+
+    def status(self):
+        print(f"""The coffee machine has:
+        {self.water_available} ml of water
+        {self.milk_available} ml of milk
+        {self.beans_available} g of coffee beans
+        {self.cups_needed} disposable cups
+        ${self.money} of money""")
+
+    def buy(self):
+        print("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:")
+        choice = input()
+
+        if choice == 'back':
+            return self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money
+
+        choice = int(choice)
+
+        if choice == 1:
+            if self.water_available < 250:
+                print("Sorry, not enough water!")
+            elif self.beans_available < 16:
+                print("Sorry, not enough coffee beans!")
+            else:
+                print("I have enough resources, making you a coffee!")
+                self.water_available -= 250
+                self.beans_available -= 16
+                self.money += 4
+                self.cups_needed -= 1
+        elif choice == 2:
+            if self.water_available < 350:
+                print("Sorry, not enough water!")
+            elif self.milk_available < 75:
+                print("Sorry, not enough milk!")
+            elif self.beans_available < 20:
+                print("Sorry, not enough coffee beans!")
+            else:
+                print("I have enough resources, making you a coffee!")
+                self.water_available -= 350
+                self.milk_available -= 75
+                self.beans_available -= 20
+                self.money += 7
+                self.cups_needed -= 1
+        elif choice == 3:
+            if self.water_available < 200:
+                print("Sorry, not enough water!")
+            elif self.milk_available < 100:
+                print("Sorry, not enough milk!")
+            elif self.beans_available < 12:
+                print("Sorry, not enough coffee beans!")
+            else:
+                print("I have enough resources, making you a coffee!")
+                self.water_available -= 200
+                self.milk_available -= 100
+                self.beans_available -= 12
+                self.money += 6
+                self.cups_needed -= 1
+        else:
+            print("Invalid choice!")
+
+        return self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money
+
+    def fill(self):
+        print("Write how many ml of water do you want to add:")
+        self.water_available += int(input())
+        print("Write how many ml of milk do you want to add:")
+        self.milk_available += int(input())
+        print("Write how many grams of coffee beans do you want to add:")
+        self.beans_available += int(input())
+        print("Write how many disposable cups of coffee do you want to add:")
+        self.cups_needed += int(input())
+        return self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money
+
+    
+    def take(self):
+        print(f"I gave you ${self.money}")
+        self.money = 0
+        return self.water_available, self.milk_available, self.beans_available, self.cups_needed, self.money
+
+
+    def exit(self):
+        pass  # No action required for exit in this case
+
+# Initiate the instance by calling the class
+coffee_machine = CoffeeMachine()
