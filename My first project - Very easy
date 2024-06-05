@@ -1,0 +1,26 @@
+# Write your code here
+print("Earned amount:")
+print("""Bubblegum: $202
+Toffee: $118
+Ice cream: $2250
+Milk chocolate: $1680
+Doughnut: $1075
+Pancake: $80""")
+
+Bubblegum = 202
+Toffee = 118
+Ice_cream = 2250
+Milk_chocolate = 1680
+Doughnut = 1075
+Pancake = 80
+
+Income = Bubblegum + Toffee + Ice_cream + Milk_chocolate + Doughnut + Pancake
+
+print(f"Income: ${Income}")
+
+print("Staff expenses:")
+staff_expenses=int(input())
+print("Other expenses:")
+other_expenses=int(input())
+net_income = Income - staff_expenses - other_expenses
+print(f"Net income: ${net_income}")
