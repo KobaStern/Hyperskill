@@ -1,0 +1,89 @@
+import random
+
+data_dict = {}
+
+while True:
+    users = input("Enter your name:")
+    print(f'Hello, {users}')
+    with open("rating.txt") as file:
+        for line in file:
+            name, number = line.split()
+            data_dict[name] = int(number)
+
+    if users in data_dict:
+        score = data_dict[users]
+    else:
+        score = 0
+        data_dict[users] = score
+
+    while True:
+        user_input = input()
+
+        if user_input == '!rating':
+            print(score)
+        elif user_input == '!exit':
+            print('Bye')
+            exit()
+        elif user_input == "":
+            print("Okay, let's start")
+            while True:
+                player_choice = input()
+                if player_choice == "!exit":
+                    print('Bye')
+                    exit()
+                elif player_choice == "!rating":
+                    print(score)
+                    continue
+                elif player_choice not in ["rock", "paper", "scissors"]:
+                    print('Invalid input')
+                    continue
+
+                computer = random.choice(["rock", "paper", "scissors"])
+                if computer == player_choice:
+                    score += 50
+                    print(f'There is a draw ({computer})')
+                elif (computer == "rock" and player_choice == "scissors") or \
+                        (computer == "paper" and player_choice == "rock") or \
+                        (computer == "scissors" and player_choice == "paper"):
+                    print(f'Sorry, but the computer chose {computer}')
+                else:
+                    score += 100
+                    print(f'Well done. The computer chose {computer} and failed')
+                data_dict[users] = score
+
+        elif ',' in user_input:
+            rules_list = user_input.split(',')
+            if len(rules_list) > 3:
+                print("Okay, let's start")
+                while True:
+                    player_choice = input()
+                    if player_choice == "!exit":
+                        print('Bye')
+                        exit()
+                    elif player_choice == "!rating":
+                        print(score)
+                        continue
+                    if player_choice not in rules_list:
+                        print('Invalid input')
+                        continue
+
+                    computer = random.choice(rules_list)
+                    index_user_choice = rules_list.index(player_choice)
+                    new_list = rules_list[index_user_choice + 1:] + rules_list[:index_user_choice]
+                    index_slice = int(len(rules_list) // 2)
+                    loose_list = new_list[:index_slice]
+                    win_list = new_list[index_slice:]
+
+                    if computer == player_choice:
+                        score += 50
+                        print(f'There is a draw ({computer})')
+                    elif computer in win_list:
+                        score += 100
+                        print(f'Well done. The computer chose {computer} and failed')
+                    else:
+                        print(f'Sorry, but the computer chose {computer}')
+                    data_dict[users] = score
+            else:
+                print('Invalid input')
+        else:
+            print('Invalid input')
