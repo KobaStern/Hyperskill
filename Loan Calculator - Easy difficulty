@@ -1,0 +1,113 @@
+import math
+import argparse
+import sys
+
+
+def calculate_diff_payment(principal, interest_rate, periods):
+    i = interest_rate / 100 / 12  # Convert annual percentage rate to a monthly decimal rate
+    P = principal
+    n = periods
+    total_paid = 0
+    for m in range(1, n + 1):
+        principal_payment = P / n
+        interest_payment = i * (P - (P * (m - 1) / n))
+        Dm = math.ceil(principal_payment + interest_payment)
+        total_paid += Dm
+        print(f"Month {m}: Payment = {round(Dm, 2)}")
+
+    overpayment = math.ceil(total_paid - principal)
+    print(f"Overpayment= {round(overpayment, 2)}")
+
+
+def calculate_payment(principal, interest_rate, periods):
+    i = interest_rate / 100 / 12  # Convert annual percentage rate to a monthly rate as a decimal
+    if i == 0:
+        annuity_payment = math.ceil(principal / periods)
+    else:
+        annuity_payment = math.ceil(principal * (i * pow(1 + i, periods)) / (pow(1 + i, periods) - 1))
+    total_paid = annuity_payment * periods
+    overpayment = total_paid - principal
+    print(f"Your annuity payment = {annuity_payment}!")
+    print(f"Overpayment= {round(overpayment, 2)}")
+
+    return annuity_payment, overpayment
+
+
+def calculate_principal(payment, interest_rate, periods):
+    i = interest_rate / 100 / 12
+    return round((payment * ((1 + i) ** periods - 1)) / (i * (1 + i) ** periods))
+
+
+def calculate_periods(payment, principal, interest_rate):
+    i = interest_rate / 100 / 12  # Monthly interest rate as a decimal
+    total_months = math.log(payment / (payment - i * principal)) / math.log(1 + i)
+    total_months = round(total_months)  # Round to the nearest whole number
+    total_payment = payment * total_months
+    overpayment = total_payment - principal
+
+    if total_months > 12:
+        years = int(total_months / 12)
+        months = int(total_months - 12 * years) + 1
+        print(f"{years} years and {months} months")
+        print(f"Overpayment= {round(overpayment, 2)}")
+
+    elif total_months == 12:
+        year = 1
+        print(f"1 {year}")
+        print(f"Overpayment= {round(overpayment, 2)}")
+    else:
+        print(f"{total_months} months")
+        print(f"Overpayment= {round(overpayment, 2)}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Calculate loan parameters.")
+    parser.add_argument('--payment', type=float, help="Monthly payment amount")
+    parser.add_argument('--principal', type=float, help="Loan principal amount")
+    parser.add_argument('--periods', type=int, help="Number of periods (months)")
+    parser.add_argument('--interest', type=float, help="Annual interest rate in percent")
+    parser.add_argument('--type', type=str.lower, help="Type of payment: 'annuity' or 'diff'")    
+    args = parser.parse_args()
+
+    # Check if required arguments are missing or invalid
+    if (args.interest is None or args.type not in ('annuity', 'diff') 
+        or list(vars(args).values()).count(None) > 1 
+        or len(sys.argv) < 5
+        or any(val < 0 for val in [args.principal, args.payment, args.periods, args.interest] if val is not None)):
+        print("Incorrect parameters")
+        return
+
+    if args.type == 'annuity':
+        if args.payment and args.principal and args.interest:
+            calculate_periods(args.payment, args.principal, args.interest)
+        elif args.principal and args.interest and args.periods:
+            payment = calculate_payment(args.principal, args.interest, args.periods)
+            print("Calculated payment:", payment)
+        elif args.payment and args.interest and args.periods:
+            principal = calculate_principal(args.payment, args.interest, args.periods)
+            print("Calculated principal:", principal)
+        elif (args.interest is None or args.type not in ('annuity', 'diff')
+              or list(vars(args).values()).count(None) > 1 or len(sys.argv) < 5
+              or any(
+                    val < 0 for val in [args.principal, args.payment, args.periods, args.interest] if val is not None)):
+            print("Incorrect parameters")
+            return  # Use return to exit from the main function
+        else:
+            print("Incorrect parameters")
+    elif args.type == 'diff':
+        if args.principal and args.interest and args.periods:
+            first_month_payment = calculate_diff_payment(args.principal, args.interest, args.periods)
+        elif (args.interest is None or args.type not in ('annuity', 'diff')
+              or list(vars(args).values()).count(None) > 1 or len(sys.argv) < 5
+              or any(
+                    val < 0 for val in [args.principal, args.payment, args.periods, args.interest] if val is not None)):
+            print("Incorrect parameters")
+            return  # Use return to exit from the main function
+        else:
+            print("Incorrect parameters")
+    else:
+        print("Incorrect parameters")
+
+
+if __name__ == '__main__':
+    main()
