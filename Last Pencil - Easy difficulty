@@ -1,0 +1,66 @@
+import random
+
+print("How many pencils would you like to use:")
+
+while True:
+    pencil_input = input()
+    if not pencil_input.isdigit():
+        print("The number of pencils should be numeric")
+    elif int(pencil_input) < 1:
+        print("The number of pencils should be positive")
+    else:
+        pencil_input = int(pencil_input)
+        break
+
+first_player = input("Who will be the first (John, Jack):")
+while first_player not in ("John", "Jack"):
+    print("Choose between John and Jack")
+    first_player = input()
+
+while True:
+    if pencil_input < 1:
+        print(f"{first_player} won!")
+        break
+
+    # printing pencils:
+    print("|" * pencil_input)
+    if first_player != "Jack":
+        print(f"{first_player}'s turn!")
+    else:
+        print(f"{first_player}'s turn:")
+
+    # inputting player:
+    if first_player != "Jack":
+        while True:
+            choice = input()
+            if choice not in ("1", "2", "3"):
+                print("Possible values: '1', '2' or '3'")
+            elif int(choice) > pencil_input:
+                print("Too many pencils were taken")
+            else:
+                break
+
+        pencil_input -= int(choice)
+
+    # if bot's turn:
+    if first_player == "Jack":
+        if pencil_input == 1:
+            print(1)
+            pencil_input -= 1
+        elif pencil_input % 4 == 0:
+            print(3)
+            pencil_input -= 3
+        elif pencil_input % 2 == 1:
+            print(2)
+            pencil_input -= 2
+        elif pencil_input % 4 == 2:
+            print(1)
+            pencil_input -= 1
+        else:
+            rand = random.randint(1, 3)
+            pencil_input -= rand
+            print(rand)
+
+    # changing turns, pencils--
+
+    first_player = "John" if first_player == "Jack" else "Jack"
