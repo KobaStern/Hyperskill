@@ -1,0 +1,185 @@
+import os
+import shutil
+
+# run the user's program in our generated folders
+os.chdir('module/root_folder')
+
+# put your code here
+print("Input the command")
+while True:
+    txt = input()
+    try:
+        if txt.lower() == "pwd":
+            print(os.getcwd())
+        elif txt.lower().startswith("cd "):  # Handle "cd" commands with arguments
+            new_dir = txt[3:].strip()  # Extract path from "cd "
+            os.chdir(new_dir)
+            print(os.path.basename(os.getcwd()))
+        elif txt.lower() == "cd ..":
+            os.chdir('..')
+            print(os.getcwd())
+        elif txt == "ls":
+            subdirectories = []
+            subfiles = []
+            for entry in os.scandir():
+                if entry.is_dir():
+                    subdirectories.append(entry.name)
+                elif entry.is_file():
+                    subfiles.append(entry.name)
+            for directory in subdirectories:
+                print(directory)
+            for file in subfiles:
+                print(file)
+        elif txt == "ls -l":
+            subdirectories = []
+            subfiles = []
+            subsize = []
+            for entry in os.scandir():
+                if entry.is_dir():
+                    subdirectories.append(entry.name)
+                elif entry.is_file():
+                    subfiles.append(entry.name)
+                    subsize.append(os.stat(entry.name).st_size)
+            for directory in subdirectories:
+                print(directory)
+            for file, size in zip(subfiles, subsize):
+                print(f"{file} {size}")
+        elif txt == "ls -lh":
+            subdirectories = []
+            subfiles = []
+            subsize = []
+            for entry in os.scandir():
+                if entry.is_dir():
+                    subdirectories.append(entry.name)
+                elif entry.is_file():
+                    subfiles.append(entry.name)
+                    subsize.append(os.stat(entry.name).st_size)
+            for directory in subdirectories:
+                print(directory)
+            for file, size in zip(subfiles, subsize):
+                size = size  # Size adjustment logic needs improvement here
+                print(f"{file} {size}B")  # Print size in bytes (B) for now, as size conversion was inaccurate
+        elif txt.lower().startswith("rm"):
+            parts = txt.split()
+            if len(parts) == 2:
+                target = parts[1]
+                if os.path.isfile(target):
+                    os.remove(target)
+                elif os.path.isdir(target):
+                    shutil.rmtree(target)
+                elif target.startswith("."):  # Assuming target is the extension, like ".log"
+                    contents = [i for i in os.listdir() if i.endswith(target)]
+                    if not contents:  # Check if the contents list is empty
+                        print(f"File extension {target} not found in this directory.")
+                    else:
+                        for file in contents:
+                            os.remove(file)  # Remove each file in the contents list
+                else:
+                    print("No such file or directory")
+            else:
+                print("Specify the file or directory")
+        elif txt.lower().startswith("mv"):
+            parts = txt.split()
+            if len(parts) == 3:
+                _, old_name, new_name = parts
+                old_path = os.path.join(os.getcwd(), old_name)  # Path for the old filename or directory
+                new_path = os.path.join(os.getcwd(), new_name)  # Path for the new filename or directory
+                if old_name.startswith("."):  # Assuming old_name is the extension, like ".log"
+                    contents = [i for i in os.listdir() if i.endswith(old_name)]
+                    if not contents:
+                        print(f"File extension {old_name} not found in this directory.")
+                    else:
+                        for file in contents:
+                            full_old_file = os.path.join(os.getcwd(), file)
+                            full_new_file = os.path.join(new_path, file)
+                            if os.path.exists(full_new_file):
+                                while True:
+                                    answer = input(f"{file} already exists in this directory. Replace? (y/n) ")
+                                    if answer.lower() == "y":
+                                        os.remove(full_new_file)
+                                        shutil.move(full_old_file, full_new_file)
+                                        break  # Exit the loop after handling
+                                    elif answer.lower() == "n":
+                                        break  # Exit the loop and move to the next file
+                                    else:
+                                        print(answer)
+                            else:
+                                shutil.move(full_old_file, full_new_file)
+                # Check if the source file or directory exists
+                if not os.path.exists(old_path):
+                    print("No such file or directory")
+                else:
+                    # Check if the destination path is a directory and needs appending of the basename
+                    if os.path.isdir(new_path):
+                        new_path = os.path.join(new_path, os.path.basename(old_path))
+
+                    # Check if the new destination (including filename) already exists
+                    if os.path.exists(old_path):
+                        print("The file or directory already exists")
+                    if os.path.exists(new_path):
+                        print("The file or directory already exists")
+                    else:
+                        os.rename(old_path, new_path)  # Perform the rename or move
+            else:
+                print("Specify the current name of the file or directory and the new location and/or name")
+        elif txt.lower().startswith("mkdir"):
+            parts = txt.split()
+            if len(parts) == 2:
+                new_dir = parts[1]
+                if not os.path.exists(new_dir):
+                    os.mkdir(new_dir)
+                else:
+                    print("The directory already exists")
+            else:
+                print("Specify the name of the directory to be made")
+        elif txt.lower().startswith("cp"):
+            parts = txt.split()
+            if len(parts) < 2:
+                print("Specify the file")
+            elif len(parts) > 3:
+                print("Specify the current name of the file or directory and the new location and/or name")
+            else:
+                copy_from = parts[1]
+                copy_to = parts[2]
+        
+                if copy_from.startswith("."):  # Handling wildcard-like extensions such as '.txt'
+                    found = False
+                    for item in os.listdir():
+                        if item.endswith(copy_from):
+                            found = True
+                            full_copy_to_path = os.path.join(copy_to, item)
+                            if os.path.exists(full_copy_to_path):
+                                print(f"{item} already exists in this directory. Replace? (y/n)")
+                                answer = input()
+                                if answer.lower() == "y":
+                                    os.remove(full_copy_to_path)
+                                    shutil.copy(item, copy_to)
+                                elif answer.lower() == "n":
+                                    continue  # Skip copying this file
+                            else:
+                                shutil.copy(item, copy_to)
+                    if not found:
+                        print(f"File extension {copy_from} not found in this directory")
+        
+                else:  # Handling specific file paths
+                    full_copy_from_path = os.path.abspath(copy_from)
+                    full_copy_to_path = os.path.join(copy_to, os.path.basename(copy_from))
+                    if not os.path.exists(full_copy_from_path):
+                        print("No such file or directory")
+                    elif os.path.exists(full_copy_to_path):
+                        print(f"{os.path.basename(copy_from)} already exists in this directory. Replace? (y/n)")
+                        answer = input()
+                        if answer.lower() == "y":
+                            os.remove(full_copy_to_path)
+                            shutil.copy(full_copy_from_path, copy_to)
+                        elif answer.lower() == "n":
+                            pass  # Do nothing, skip this file
+                        else:
+                            print("Invalid command")
+                    else:
+                        shutil.copy(full_copy_from_path, copy_to)
+
+        elif txt.lower() == "quit":
+            break
+    except FileNotFoundError:
+        print("Directory does not exist.")
