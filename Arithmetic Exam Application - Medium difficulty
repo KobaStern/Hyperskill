@@ -1,0 +1,90 @@
+import random
+import math
+n = 0
+count = 0 
+while n < 5:
+    level = input("""Which level do you want? Enter a number:
+    1 - simple operations with numbers 2-9
+    2 - integral squares of 11-29""")
+    # Generate two random numbers and a random operator
+    while True:
+        try:
+            if level == "1":
+                number1 = random.randint(2, 9)
+                number2 = random.randint(2, 9)
+                operator = random.choice(["+", "-", "*"])  # Pass a list of operators to choose from
+                
+                # Create the question and calculate the correct solution
+                question = f"{number1} {operator} {number2}"
+                solution = eval(question)
+                
+                # Display the question to the user
+                print(question)
+            
+            
+            # Get the user's answer
+                while True:
+                    try:
+                        user_answer = int(input())
+                        if user_answer == solution:
+                            print("Right!")
+                            count += 1
+                        else:
+                            print("Wrong!")
+                        n += 1
+                        break
+                    except ValueError:
+                            print("Incorrect format.")
+                            continue
+            
+                if n == 5:
+                    save = input(f"Your mark is {count}/5. Would you like to save your result to the file? Enter yes or no.")
+                    if save in ["yes", "YES", "y", "Yes", "Y"]:
+                        name = input("What is your name?")
+                        with open('results.txt', 'a') as file:
+                            file.write(f"{name}: {count}/5 in level 1 (simple operations with numbers 2-9.)")
+                            print('The results are saved in "results.txt"')
+                    else:
+                        break
+            
+            elif level == "2":
+                number1 = random.randint(11, 29)                
+                # Create the question and calculate the correct solution
+                question = f"{number1}"
+                solution = math.pow(number1,2)
+                
+                # Display the question to the user
+                print(question)
+                
+                # Get the user's answer
+                while True:
+                    try:
+                        user_answer = int(input())
+                        if user_answer == solution:
+                            print("Right!")
+                            count += 1
+                        else:
+                            print("Wrong!")
+                        n += 1
+                        break
+                    except ValueError:
+                            print("Incorrect format.")
+                            continue
+            
+                if n == 5:
+                    save = input(f"Your mark is {count}/5. Would you like to save your result to the file? Enter yes or no.")
+                    if save in ["yes", "YES", "y", "Yes", "Y"]:
+                        name = input("What is your name?")
+                        with open('results.txt', 'a') as file:
+                            file.write(f"{name}: {count}/5 in level 2 (integral squares of 11-29.)")
+                            print('The results are saved in "results.txt"')
+                    else:
+                        break            
+            else:
+                print("Incorrect format.")
+                continue
+
+        except ValueError:
+            print("Incorrect format.")
+            continue
+            
