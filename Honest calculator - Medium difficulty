@@ -1,0 +1,114 @@
+memory = 0
+
+while True:
+    print("Enter an equation")
+    calc = input()
+
+    # Replace 'M' with memory value
+    calc = calc.replace('M', str(memory))
+
+    # Split the string by spaces to separate the components
+    components = calc.split()
+
+    # Check if there are three components
+    if len(components) != 3:
+        print("Invalid equation format. Please enter again.")
+        continue
+
+    x, operation, y = components
+
+    try:
+        # Convert x and y to floats to perform checks and calculations
+        x = float(x)
+        y = float(y)
+    except ValueError:
+        print("Invalid numbers in equation. Stay focused!")
+        continue
+
+    msg = ""
+    msg_6 = " ... lazy"
+    msg_7 = " ... very lazy"
+    msg_8 = " ... very, very lazy"
+    msg_9 = "You are"
+    msg_10 = "Are you sure? It is only one digit! (y / n)"
+    msg_11 = "Don't be silly! It's just one number! Add to the memory? (y / n)"
+    msg_12 = "Last chance! Do you really want to embarrass yourself? (y / n)"
+
+    msg_final = [0,1,2,3,4,5," ... lazy"," ... very lazy"," ... very, very lazy","Are you sure? It is only one digit! (y / n)","Don't be silly! It's just one number! Add to the memory? (y / n)","Last chance! Do you really want to embarrass yourself? (y / n)"]
+
+    # Message addition logic
+    def is_one_digit(v1, v2):
+        global msg
+        if -10 < v1 < 10 and -10 < v2 < 10 and v1.is_integer() and v2.is_integer():
+            msg += msg_6
+    
+    is_one_digit(x, y)
+
+    if (x == 1 or y == 1) and operation == "*":
+        msg += msg_7
+
+    if (x == 0 or y == 0) and (operation == "*" or operation == "+" or operation == "-"):
+        msg += msg_8
+
+    if msg != "": 
+        msg = msg_9 + msg
+
+
+    # Validate operation
+    if operation not in ['+', '-', '*', '/']:
+        print("Invalid operation. Stay focused!")
+        continue
+
+    if operation == '/' and y == 0:
+        if msg:
+            full_msg = msg + "\nYeah... division by zero. Smart move..."
+        else:
+            full_msg = "Yeah... division by zero. Smart move..."
+        print(full_msg)
+        continue
+
+    # Perform the calculation
+    result = 0
+    if operation == '+':
+        result = x + y
+    elif operation == '-':
+        result = x - y
+    elif operation == '*':
+        result = x * y
+    elif operation == '/':
+        result = x / y
+
+    # Append the result to msg and print it
+    result_msg = f"{result}"
+    if msg:
+        print(msg)
+        print(result_msg)
+    else:
+        msg = result_msg
+        print(msg)
+
+    # Ask if the user wants to store the result 
+    if input("Do you want to store the result? (y / n): ").lower() == 'y':
+        if not result.is_integer() or (result.is_integer() and (result < -10 or result > 10)):
+            memory = result
+        elif result.is_integer() and -10 < result < 10:
+            msg_final = [
+                "Are you sure? It is only one digit! (y / n)",
+                "Don't be silly! It's just one number! Add to the memory? (y / n)",
+                "Last chance! Do you really want to embarrass yourself? (y / n)"
+            ]
+            msg_index = 0
+            while msg_index < len(msg_final):
+                response = input(msg_final[msg_index])
+                if response.lower() != 'y':
+                    break
+                msg_index += 1
+            if msg_index == len(msg_final):  # All messages confirmed
+                memory = result
+    else:
+        pass
+
+
+
+    if input("Do you want to continue calculations? (y / n): ").lower() == 'n':
+        break
