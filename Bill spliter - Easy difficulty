@@ -1,0 +1,26 @@
+import random
+guests = input("Enter the number of friends joining (including you):")
+guests = int(guests)
+if guests > 0:
+    print("Enter the name of every friend (including you), each on a new line:")
+    i = 0
+    thisdict = {}
+    for i in range(guests):
+        thisdict.update({input(): 0})
+    bill = float(input("Enter the total bill value:"))
+    question = input('Do you want to use the "Who is lucky?" feature? Write Yes/No:')
+    if question == 'Yes':
+        winner = random.choice(list(thisdict.keys()))
+        new_value = round(bill / (guests - 1), 2)
+        thisdict = {key: new_value for key in thisdict}
+        thisdict.update({winner: 0})
+        print(f"{winner} is the lucky one!")
+        print(thisdict)
+    elif question == 'No':
+        print('No one is going to be lucky')
+        new_value = round(bill / (guests), 2)
+        thisdict = {key: new_value for key in thisdict}
+        print(thisdict)
+else:
+    print("No one is joining for the party")
+    
