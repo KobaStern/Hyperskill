@@ -1,0 +1,185 @@
+import random
+from itertools import combinations_with_replacement
+from collections import Counter
+
+# Function to create a full domino set
+def create_domino_set():
+    return [list(x) for x in combinations_with_replacement(range(7), 2)]
+
+# Function to draw dominos for a hand
+def draw_dominoes(domino_set, hand_size):
+    return [domino_set.pop(random.randint(0, len(domino_set) - 1)) for _ in range(hand_size)]
+
+# Function to determine the starting domino and which player starts
+def draw_start(player_hand, computer_hand):
+    max_player = max([x for x in player_hand if x[0] == x[1]], default=[-1, -1])
+    max_computer = max([x for x in computer_hand if x[0] == x[1]], default=[-1, -1])
+    
+    if max_player > max_computer:
+        player_hand.remove(max_player)
+        status = "Computer is about to make a move. Press Enter to continue..."
+        return max_player, status, 1
+    else:
+        computer_hand.remove(max_computer)
+        status = "It's your turn to make a move. Enter your command."
+        return max_computer, status, 0
+
+# Function to make a player's move
+def place_domino(player, snake, stock_pieces):
+    while True:
+        try:
+            move = int(input())
+        except ValueError:
+            print("Invalid input. Please try again.")
+            continue
+
+        if move == 0:
+            if stock_pieces:
+                player.append(stock_pieces.pop())
+            return player, snake
+
+        i_move = abs(move) - 1
+
+        if i_move >= len(player):
+            print("Invalid input. Please try again.")
+            continue
+
+        piece = player[i_move]
+
+        if move < 0:  # Place at the left beginning of the snake
+            if piece[0] == snake[0][0] or piece[1] == snake[0][0]:
+                if piece[0] == snake[0][0]:  # Reorient the piece if needed
+                    piece = piece[::-1]
+                snake.insert(0, piece)
+                player.pop(i_move)
+                return player, snake
+            else:
+                print("Illegal move. Please try again.")
+                continue
+        else:  # Place at the right end of the snake
+            if piece[0] == snake[-1][-1] or piece[1] == snake[-1][-1]:
+                if piece[1] == snake[-1][-1]:  # Reorient the piece if needed
+                    piece = piece[::-1]
+                snake.append(piece)
+                player.pop(i_move)
+                return player, snake
+            else:
+                print("Illegal move. Please try again.")
+                continue
+
+# Function to make a computer's move
+def count_numbers(pieces):
+    counts = Counter()
+    for piece in pieces:
+        counts[piece[0]] += 1
+        counts[piece[1]] += 1
+    return counts
+
+# Function to create a scores dictionary based on the counts
+def create_scores_dictionary(computer_hand, counts):
+    scores = {}
+    for index, domino in enumerate(computer_hand):
+        sum_counts = counts[domino[0]] + counts[domino[1]]
+        scores[index] = sum_counts
+    return scores
+
+def computer_domino(computer, snake, stock_pieces):
+    def find_and_play_best_move():
+        total_dominos = computer + snake
+        counts = count_numbers(total_dominos)
+        scores = create_scores_dictionary(computer, counts)
+        sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+
+        for index, score in sorted_scores:
+            piece = computer[index]
+            if piece[0] == snake[0][0] or piece[1] == snake[0][0]:
+                if piece[0] == snake[0][0]:
+                    piece = piece[::-1]
+                snake.insert(0, piece)
+                computer.pop(index)
+                return True
+            elif piece[0] == snake[-1][-1] or piece[1] == snake[-1][-1]:
+                if piece[1] == snake[-1][-1]:
+                    piece = piece[::-1]
+                snake.append(piece)
+                computer.pop(index)
+                return True
+        return False
+
+    # Try to play the best move first
+    if not find_and_play_best_move():
+        # If no valid move, draw a piece from stock and try again
+        if stock_pieces:
+            computer.append(stock_pieces.pop())
+
+    return computer, snake
+
+# Function to print the current game status
+def print_game_status(snake, stock_pieces, computer_pieces, player_pieces):
+    snake_length = len(snake)
+    if snake_length > 6:
+        first = snake[0:3]
+        dots = ['...']
+        second = snake[-3:]
+        printed_snake = ''.join(map(str, first)) + ' ' + ' '.join(dots) + ' ' + ''.join(map(str, second))
+    else:
+        printed_snake = ''.join(map(str, snake))
+
+    print('=' * 70)
+    print(f'Stock size: {len(stock_pieces)}')
+    print(f'Computer pieces: {len(computer_pieces)}')
+    print(f'\n\n{printed_snake}\n\n')
+    print('Your pieces:')
+    for num, piece in enumerate(player_pieces):
+        print(f"{num + 1}: {piece}")
+    print("\n")
+
+# Function to check if the game is over
+def check_game_over(computer_pieces, player_pieces, stock_pieces, snake):
+    if not computer_pieces:
+        print('Status: The game is over. The computer won!')
+        return True
+    if not player_pieces:
+        print("Status: The game is over. You won!")
+        return True
+    if len(stock_pieces) == 0 and not any(piece for piece in player_pieces + computer_pieces if piece[0] in [snake[0][0], snake[-1][-1]] or piece[1] in [snake[0][0], snake[-1][-1]]):
+        print("Status: The game is over. It's a draw!")
+        return True
+    if snake[0][0] == snake[-1][-1] and sum(x.count(snake[0][0]) for x in snake) == 8:
+        print("Status: The game is over. It's a draw!")
+        return True
+    return False
+
+# Main function to play the game
+def play_game():
+    # Initialize the game
+    full_domino_set = create_domino_set()
+    player_hand = draw_dominoes(full_domino_set, 7)
+    computer_hand = draw_dominoes(full_domino_set, 7)
+    stock_hand = full_domino_set
+
+    snake, status, turn_num = draw_start(player_hand, computer_hand)
+
+    # Ensure snake is a list of lists
+    snake = [snake]
+
+    # Main game loop
+    while True:
+        print_game_status(snake, stock_hand, computer_hand, player_hand)
+        
+        if check_game_over(computer_hand, player_hand, stock_hand, snake):
+            break
+        
+        print("\nStatus:", status)
+        if turn_num % 2 == 0:
+            player_hand, snake = place_domino(player_hand, snake, stock_hand)
+            status = "Computer is about to make a move. Press Enter to continue..."
+        else:
+            input()
+            computer_hand, snake = computer_domino(computer_hand, snake, stock_hand)  # Pass stock_hand to computer_domino
+            status = "It's your turn to make a move. Enter your command."
+        
+        turn_num += 1
+# Execute the game
+if __name__ == "__main__":
+    play_game()
