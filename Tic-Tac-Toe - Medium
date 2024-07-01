@@ -1,0 +1,68 @@
+def print_grid(grid):
+    print("---------")
+    for i in range(3):
+        print(f"| {' '.join(grid[i*3:(i+1)*3])} |")
+    print("---------")
+
+def check_game_state(grid):
+    rows = [grid[i:i+3] for i in range(0, 9, 3)]
+    cols = [grid[i::3] for i in range(3)]
+    diags = [grid[::4], grid[2:8:2]]
+    all_lines = rows + cols + diags
+    x_wins = any(''.join(line) == "XXX" for line in all_lines)
+    o_wins = any(''.join(line) == "OOO" for line in all_lines)
+    
+    if x_wins:
+        return "X wins"
+    elif o_wins:
+        return "O wins"
+    elif ' ' not in grid:
+        return "Draw"
+    else:
+        return "Game not finished"
+
+def coord_to_index(row, col):
+    return (row - 1) * 3 + (col - 1)
+
+def get_user_move(grid):
+    while True:
+        try:
+            coords = input("Enter the coordinates (row column): ")
+            row, col = map(int, coords.split())
+            
+            if row < 1 or row > 3 or col < 1 or col > 3:
+                print('Coordinates should be from 1 to 3!')
+                continue
+            
+            index = coord_to_index(row, col)
+            
+            if grid[index] != ' ':
+                print('This cell is occupied! Choose another one!')
+                continue
+            
+            return index
+        
+        except ValueError:
+            print('You should enter numbers!')
+
+def main():
+    grid = [' ' for _ in range(9)]
+    player = 'X'
+    
+    while True:
+        print_grid(grid)
+        print(f"Player {player}'s turn")
+        
+        index = get_user_move(grid)
+        grid[index] = player
+        
+        game_state = check_game_state(grid)
+        if game_state != "Game not finished":
+            print_grid(grid)
+            print(game_state)
+            break
+        
+        player = 'O' if player == 'X' else 'X'
+
+if __name__ == "__main__":
+    main()
